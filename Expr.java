@@ -1,5 +1,6 @@
+import java.util.ArrayList;
 
-abstract class Expr {
+public abstract class Expr {
     //abstract String toLatex();
     abstract boolean isConstant();
 }
@@ -18,9 +19,9 @@ class Constant extends Expr {
 }
 
 class Product extends Expr {
-    public Expr[] factors;
+    public ArrayList<Expr> factors;
 
-    public Product(Expr[] factors){ //initializes product object with array of factor expressions
+    public Product(ArrayList<Expr> factors){ //initializes product object with array of factor expressions
         this.factors = factors;
     }
 
@@ -64,9 +65,9 @@ class Power extends Expr {
 }
 
 class Sum extends Expr {
-    public Expr[] addends;
+    public ArrayList<Expr> addends;
 
-    public Sum(Expr[] addends){ //initializes sum with array of addend expressions
+    public Sum(ArrayList<Expr> addends){ //initializes sum with array of addend expressions
         this.addends = addends;
     }
 
@@ -93,6 +94,21 @@ class TrigFunc extends Expr {
     @Override
     public boolean isConstant(){ // trig function is a constant if the argument is a constant
         return (arg instanceof Constant);
+    }
+}
+
+class Fraction extends Expr {
+    public Expr numerator;
+    public Expr denominator;
+
+    public Fraction(Expr numerator, Expr denominator){ //initializes fraction with numerator and denominator expressions
+        this.numerator = numerator;
+        this.denominator = denominator;
+    }
+
+    @Override
+    public boolean isConstant(){
+        return (numerator instanceof Constant && denominator instanceof Constant); //fraction is constant if both numerator and denominator are constants
     }
 }
 
