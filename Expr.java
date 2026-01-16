@@ -7,9 +7,21 @@ public abstract class Expr {
 
 class Constant extends Expr {
     public double value;
+    public boolean isChar;
+    public String rep;
 
     public Constant(double value){ //initalizes constant with its value
         this.value = value;
+        this.isChar = false;
+        this.rep = null;
+    }
+    public Constant(String value){ //constructs a constant represented by a character
+        this.isChar = true;
+        this.rep = value;
+        switch(value){
+            case "\\pi" -> this.value = 3.14159;
+            case "e" -> this.value = 2.71828;
+        }
     }
 
     @Override
@@ -23,6 +35,11 @@ class Product extends Expr {
 
     public Product(ArrayList<Expr> factors){ //initializes product object with array of factor expressions
         this.factors = factors;
+    }
+    public Product(Constant c, Expr ex){ //for easy creation of an expression multiplied by a constant
+        this.factors = new ArrayList<>();
+        factors.add(c);
+        factors.add(ex);
     }
 
     @Override
@@ -52,10 +69,18 @@ class Variable extends Expr {
 class Power extends Expr {
     public Expr base;
     public Expr exponent;
+    public boolean isRoot;
 
     public Power(Expr base, Expr exponent){ //initializes power with base expression and exponent expression
         this.base = base;
         this.exponent = exponent;
+        this.isRoot = false;
+    }
+
+    public Power(Expr base, Expr root, boolean isRoot){
+        this.base = base;
+        this.exponent = root;
+        this.isRoot = isRoot;
     }
 
     @Override
