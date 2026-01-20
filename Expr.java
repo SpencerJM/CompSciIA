@@ -152,6 +152,15 @@ class Sum extends Expr {
         }
         return true;
     }
+
+    @Override
+    public String toLatex(){
+        String out = addends.get(0).toLatex();
+        for(int i = 1; i < addends.size(); i++){
+            out += ("+" + addends.get(i).toLatex());
+        }
+        return out;
+    }
 }
 
 class TrigFunc extends Expr {
@@ -167,6 +176,11 @@ class TrigFunc extends Expr {
     public boolean isConstant(){ // trig function is a constant if the argument is a constant
         return (val instanceof Constant);
     }
+
+    @Override
+    public String toLatex(){
+        return (name + "(" + val.toLatex() + ")");
+    }
 }
 
 class Fraction extends Expr {
@@ -181,6 +195,11 @@ class Fraction extends Expr {
     @Override
     public boolean isConstant(){
         return (numerator instanceof Constant && denominator instanceof Constant); //fraction is constant if both numerator and denominator are constants
+    }
+
+    @Override
+    public String toLatex(){
+        return ("\\frac{" + numerator.toLatex() + "}{" + denominator.toLatex() + "}");
     }
 }
 
