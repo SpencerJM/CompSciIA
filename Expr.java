@@ -1,32 +1,42 @@
 import java.util.ArrayList;
 
 public abstract class Expr {
-    //abstract String toLatex();
+    abstract String toLatex();
     abstract boolean isConstant();
+
+    String name = null;
+    Expr val = null;
+    Double num = null;
 }
 
 class Constant extends Expr {
-    public double value;
-    public boolean isChar;
-    public String rep;
+    private boolean isChar;
 
     public Constant(double value){ //initalizes constant with its value
-        this.value = value;
+        this.num = value;
         this.isChar = false;
-        this.rep = null;
     }
-    public Constant(String value){ //constructs a constant represented by a character
+    public Constant(String name){ //constructs a constant represented by a character
         this.isChar = true;
-        this.rep = value;
-        switch(value){
-            case "\\pi" -> this.value = 3.14159;
-            case "e" -> this.value = 2.71828;
+        this.name = name;
+        switch(name){
+            case "\\pi" -> this.num = 3.14159;
+            case "e" -> this.num = 2.71828;
         }
     }
 
     @Override
     public boolean isConstant(){ //Constants are constants
         return true;
+    }
+
+    @Override
+    public String toLatex(){
+        if(isChar){
+            return name;
+        } else {
+            return "" + num;
+        }
     }
 }
 
@@ -51,10 +61,18 @@ class Product extends Expr {
         }
         return true;
     }
+
+    @Override
+    public String toLatex(){
+        String out = "";
+        for (Expr factor : factors){
+            out += factor.toLatex();
+        }
+        return out;
+    } 
 }
 
 class Variable extends Expr {
-    public String name;
 
     public Variable(String name){ //initializes variable with its name
         this.name = name;
@@ -63,6 +81,11 @@ class Variable extends Expr {
     @Override
     public boolean isConstant(){ //variables are not constants
         return false;
+    }
+
+    @Override
+    public String toLatex(){
+        return name;
     }
 }
 
@@ -87,6 +110,29 @@ class Power extends Expr {
     public boolean isConstant(){ // power is a constant if both base and exponents are constants
         return (base instanceof Constant && exponent instanceof Constant);
     }
+
+    @Override
+    public String toLatex(){
+        if(!isRoot){
+            if(base instanceof TrigFunc){
+                return (base.name + "^{" + exponent.toLatex() + "}(" + base.val.toLatex() + ")");
+            }
+            else if(base instanceof Constant || base instanceof Variable){
+                return (base.toLatex() + "^{" + exponent.toLatex() + "}");
+            }
+            else {
+                return ("(" + base.toLatex() + ")^{" + exponent.toLatex() + "}");
+            }
+        }
+        else {
+            if(exponent instanceof Constant && exponent.num == 2.0){
+                return ("\\sqrt{" + base.toLatex() + "}");
+            } else {
+                return ("\\sqrt[" + exponent.toLatex() + "]{" + base.toLatex() + "}");
+            }
+        }
+        
+    }
 }
 
 class Sum extends Expr {
@@ -94,6 +140,7 @@ class Sum extends Expr {
 
     public Sum(ArrayList<Expr> addends){ //initializes sum with array of addend expressions
         this.addends = addends;
+        this.name = null;
     }
 
     @Override
@@ -109,16 +156,16 @@ class Sum extends Expr {
 
 class TrigFunc extends Expr {
     public Trig func;
-    public Expr arg;
 
     public TrigFunc(Trig func, Expr arg){ //initializes trig function with function type and argument
         this.func = func;
-        this.arg = arg;
+        this.val = arg;
+        this.name = func.name;
     }
 
     @Override
     public boolean isConstant(){ // trig function is a constant if the argument is a constant
-        return (arg instanceof Constant);
+        return (val instanceof Constant);
     }
 }
 
@@ -138,13 +185,19 @@ class Fraction extends Expr {
 }
 
 enum Trig { //enum with trig functions and stuff
-    SIN,
-    COS,
-    TAN,
-    ASIN,
-    ACOS,
-    ATAN,
-    SEC,
-    CSC,
-    COT
+    SIN("\\sin"),
+    COS("\\cos"),
+    TAN("\\tan"),
+    ASIN("\\arcsin"),
+    ACOS("\\arccos"),
+    ATAN("\\arctan"),
+    SEC("\\sec"),
+    CSC("\\csc"),
+    COT("\\cot");
+
+    public String name;
+
+    private Trig(String name){
+        this.name = name;
+    }
 }
