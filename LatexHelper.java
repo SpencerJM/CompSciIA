@@ -98,6 +98,7 @@ public class LatexHelper {
                     i += closeIndex(fwd, Brackets.CURLY_BRACKETS); // moves index up to the closing of the square root, index will be beginning of next factor once incremented
                 }
                 else if(fwd.startsWith("\\frac")){
+                    //System.out.println("FOUND A FRACTION!!");
                     Expr numerator = toExpr(fwd.substring(fwd.indexOf("{")+1, closeIndex(fwd, Brackets.CURLY_BRACKETS)));
                     Expr denominator = toExpr(fwd.substring(closeIndex(fwd, Brackets.CURLY_BRACKETS)+2, closeIndex(fwd, Brackets.CURLY_BRACKETS, 2)));
                     factors.add(new Fraction(numerator, denominator));
