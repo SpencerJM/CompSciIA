@@ -101,6 +101,7 @@ public class LatexHelper {
                     //System.out.println("FOUND A FRACTION!!");
                     Expr numerator = toExpr(fwd.substring(fwd.indexOf("{")+1, closeIndex(fwd, Brackets.CURLY_BRACKETS)));
                     Expr denominator = toExpr(fwd.substring(closeIndex(fwd, Brackets.CURLY_BRACKETS)+2, closeIndex(fwd, Brackets.CURLY_BRACKETS, 2)));
+                    System.out.println(denominator.toLatex());
                     factors.add(new Fraction(numerator, denominator));
                     i += closeIndex(fwd, Brackets.CURLY_BRACKETS, 2); // moves index up to the closing of the fraction, index will be beginning of next factor once incremented
                 }
@@ -127,57 +128,55 @@ public class LatexHelper {
                     }
                     i += closeIndex(fwd, Brackets.PARENTHECES); // moves index up to the closing of the function, index will be beginning of next factor once incremented
                 } //end of function checker
+                continue;
+            }
 
-                if(endConstantIndex(fwd) != 0){
-                    factor = new Constant(Double.parseDouble(fwd.substring(0, endConstantIndex(fwd))));
-                    if(fwd.substring(endConstantIndex(fwd), endConstantIndex(fwd)+1).equals("^")){
-                        Expr exponent = toExpr(fwd.substring(fwd.indexOf("{"), closeIndex(fwd, Brackets.CURLY_BRACKETS)));
-                        factors.add(new Power(factor, exponent));
-                        i += closeIndex(fwd, Brackets.CURLY_BRACKETS);
-                    } else {
-                        factors.add(factor);
-                        i += endConstantIndex(fwd) - 1;
+            if(endConstantIndex(fwd) != 0){
+                factor = new Constant(Double.parseDouble(fwd.substring(0, endConstantIndex(fwd))));
+                if(fwd.substring(endConstantIndex(fwd), endConstantIndex(fwd)+1).equals("^")){
+                    Expr exponent = toExpr(fwd.substring(fwd.indexOf("{"), closeIndex(fwd, Brackets.CURLY_BRACKETS)));
+                    factors.add(new Power(factor, exponent));
+                    i += closeIndex(fwd, Brackets.CURLY_BRACKETS);
+                } else {
+                    factors.add(factor);
+                    i += endConstantIndex(fwd) - 1;
+                }
+            } else { //variables and defined constants w/o backslash
+                switch(c){
+                    case "e" -> {
+                        factor = new Constant("e");
+                        if(fwd.contains("^") && fwd.indexOf("^") == 1){
+                            Expr exponent = toExpr(fwd.substring(fwd.indexOf("{"), closeIndex(fwd, Brackets.CURLY_BRACKETS)));
+                            factors.add(new Power(factor, exponent));
+                            i += closeIndex(fwd, Brackets.CURLY_BRACKETS);
+                        } else {
+                            factors.add(factor);
+                            //index (i) increments by zero in this case
+                        }
                     }
-                } else { //variables and defined constants w/o backslash
-                    switch(c){
-                        case "e" -> {
-                            factor = new Constant("e");
-                            if(fwd.contains("^") && fwd.indexOf("^") == 1){
-                                Expr exponent = toExpr(fwd.substring(fwd.indexOf("{"), closeIndex(fwd, Brackets.CURLY_BRACKETS)));
-                                factors.add(new Power(factor, exponent));
-                                i += closeIndex(fwd, Brackets.CURLY_BRACKETS);
-                            } else {
-                                factors.add(factor);
-                                //index (i) increments by zero in this case
-                            }
+                    case "d" -> { //for things like "dx"
+                        factor = new Variable(fwd.substring(0, 2));
+                        if(fwd.contains("^") && fwd.indexOf("^") == 2){
+                            Expr exponent = toExpr(fwd.substring(fwd.indexOf("^"), closeIndex(fwd, Brackets.CURLY_BRACKETS)));
+                            factors.add(new Power(factor, exponent));
+                            i += closeIndex(fwd, Brackets.CURLY_BRACKETS);
+                        } else {
+                            factors.add(factor);
+                            i += 1;
                         }
-                        case "d" -> { //for things like "dx"
-                            factor = new Variable(fwd.substring(0, 2));
-                            if(fwd.contains("^") && fwd.indexOf("^") == 2){
-                                Expr exponent = toExpr(fwd.substring(fwd.indexOf("^"), closeIndex(fwd, Brackets.CURLY_BRACKETS)));
-                                factors.add(new Power(factor, exponent));
-                                i += closeIndex(fwd, Brackets.CURLY_BRACKETS);
-                            } else {
-                                factors.add(factor);
-                                i += 1;
-                            }
-                        }
-                        default -> { //all variables are single letters
-                            factor = new Variable(c);
-                            if(fwd.contains("^") && fwd.indexOf("^") == 1){
-                                Expr exponent = toExpr(fwd.substring(fwd.indexOf("{"), closeIndex(fwd, Brackets.CURLY_BRACKETS)));
-                                factors.add(new Power(factor, exponent));
-                                i += closeIndex(fwd, Brackets.CURLY_BRACKETS);
-                            } else {
-                                factors.add(factor);
-                                //index (i) increments by zero in this case
-                            }
+                    }
+                    default -> { //all variables are single letters
+                        factor = new Variable(c);
+                        if(fwd.contains("^") && fwd.indexOf("^") == 1){
+                            Expr exponent = toExpr(fwd.substring(fwd.indexOf("{"), closeIndex(fwd, Brackets.CURLY_BRACKETS)));
+                            factors.add(new Power(factor, exponent));
+                            i += closeIndex(fwd, Brackets.CURLY_BRACKETS);
+                        } else {
+                            factors.add(factor);
+                            //index (i) increments by zero in this case
                         }
                     }
                 }
-
-
-                
             } 
         } 
         
