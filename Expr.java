@@ -1,10 +1,11 @@
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public abstract class Expr {
     abstract String toLatex();
     abstract boolean isConstant();
 
-    String name = null;
+    public String name = null;
     Expr val = null;
     Double num = null;
 }
@@ -203,6 +204,26 @@ class Fraction extends Expr {
     }
 }
 
+class Integral extends Expr {
+    public Variable respectTo;
+    public Expr arg;
+
+    public Integral(Expr arg, Variable respectTo){
+        this.respectTo = respectTo;
+        this.arg = arg;
+    }
+
+    @Override
+    public boolean isConstant(){
+        return false; //idk what to do here, might change later
+    }
+
+    @Override
+    public String toLatex(){
+        return ("\\int(" + arg.toLatex() + ")" + respectTo.toLatex());
+    }
+}
+
 enum Trig { //enum with trig functions and stuff
     SIN("\\sin"),
     COS("\\cos"),
@@ -218,5 +239,20 @@ enum Trig { //enum with trig functions and stuff
 
     private Trig(String name){
         this.name = name;
+    }
+}
+
+class Main {
+    public static void main(String[] args){
+        
+        Scanner s = new Scanner(System.in);
+        System.out.print("enter latex expression: ");
+        String latex = s.nextLine();
+        Expr thing = LatexHelper.toExpr(latex);
+        System.out.println(latex.equals(thing.toLatex()));
+        //System.out.println(thing.toLatex().substring(thing.toLatex().length() - 1, thing.toLatex().length()).equals("\\"));
+        System.out.println(thing.toLatex());
+        s.close();
+        
     }
 }

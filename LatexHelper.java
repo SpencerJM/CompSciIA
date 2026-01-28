@@ -101,9 +101,15 @@ public class LatexHelper {
                     //System.out.println("FOUND A FRACTION!!");
                     Expr numerator = toExpr(fwd.substring(fwd.indexOf("{")+1, closeIndex(fwd, Brackets.CURLY_BRACKETS)));
                     Expr denominator = toExpr(fwd.substring(closeIndex(fwd, Brackets.CURLY_BRACKETS)+2, closeIndex(fwd, Brackets.CURLY_BRACKETS, 2)));
-                    System.out.println(denominator.toLatex());
+                    //System.out.println(denominator.toLatex());
                     factors.add(new Fraction(numerator, denominator));
                     i += closeIndex(fwd, Brackets.CURLY_BRACKETS, 2); // moves index up to the closing of the fraction, index will be beginning of next factor once incremented
+                }
+                else if(fwd.startsWith("\\int")) { //integral
+                    Expr arg = toExpr(fwd.substring(fwd.indexOf("(")+1, closeIndex(fwd, Brackets.PARENTHECES)));
+                    Variable respectTo = new Variable(fwd.substring(fwd.indexOf("d", closeIndex(fwd, Brackets.PARENTHECES)), fwd.indexOf("d", closeIndex(fwd, Brackets.PARENTHECES))+2));
+                    factors.add(new Integral(arg, respectTo));
+                    i += fwd.indexOf("d", closeIndex(fwd, Brackets.PARENTHECES)) + 1;
                 }
                 else { //trig functions
                     Expr arg = toExpr(fwd.substring(fwd.indexOf("(")+1, closeIndex(fwd, Brackets.PARENTHECES))); //creates expression for function's argument
@@ -217,7 +223,7 @@ public class LatexHelper {
         return -1;
     }
 
-    private static int closeIndex(String input, Brackets type, int num){
+    private static int closeIndex(String input, Brackets type, int num){ //modified version of the method that returns the index of the nth closing
         String close;
 
         int layer = 0;
